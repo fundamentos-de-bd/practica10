@@ -163,7 +163,8 @@ CREATE TABLE cliente (
     numero_ext VARCHAR(10),
     numero_int VARCHAR(10),
     cp NUMBER(5) NOT NULL,
-    curp VARCHAR(18) NOT NULL
+    curp VARCHAR(18) NOT NULL,
+    fecha_reg DATE DEFAULT CURRENT_DATE
 );
 
 ALTER TABLE cliente
