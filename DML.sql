@@ -81,6 +81,54 @@ SELECT DISTINCT id_producto
 -- ========================================================================== --
 
 -- ========================================================================== --
+-- 9. Conocer cuales son TODOS los productos que se tienen en cada uno de los
+--departamentos de las diferentes sucursales.
+SELECT id_suc Sucursal, id_departamento Departamento, id_producto Producto
+    FROM (tener_departamento NATURAL JOIN instancia_producto)
+    ORDER BY id_suc, id_departamento;
+-- ========================================================================== --
+
+-- ========================================================================== --
+-- 10. Conocer cuál es la sucursal con mayor número de productos registrados en sus
+--diferentes departamentos.
+--NOTA: en caso de empate, regresa todas las que cumplen el criterio (no única).
+SELECT id_suc
+    FROM ((SELECT id_suc, woop1
+            FROM (
+                SELECT id_suc, SUM(woop) woop1
+                    FROM (SELECT id_suc, COUNT(id_producto) woop
+                            FROM (tener_departamento NATURAL JOIN instancia_producto)
+                            GROUP BY id_suc
+                    )
+                 GROUP BY id_suc
+            )
+            GROUP BY id_suc, woop1
+        )CROSS JOIN (SELECT MAX(woop1) w
+                        FROM ( SELECT SUM(woop) woop1
+                                FROM (SELECT id_suc, COUNT(id_producto) woop
+                                        FROM (tener_departamento NATURAL JOIN instancia_producto)
+                                        GROUP BY id_suc
+                                )
+                        )
+                    )
+    )
+    WHERE woop1 = w;
+-- ========================================================================== --
+
+-- ========================================================================== --
+-- 11. Eliminar a los empleados que tengan más de 3 trabajos en diferentes sucursales.
+DELETE FROM Empleado
+    WHERE  id_empleado 
+        IN ( SELECT id_empleado
+                FROM (SELECT id_empleado
+                        FROM trabajar
+                        GROUP BY id_empleado
+                        HAVING COUNT(id_empleado) > 3
+                ) NATURAL JOIN persona
+        );
+-- ========================================================================== --
+
+-- ========================================================================== --
 -- 12. Eliminar a las sucursales que tengan menos de 1 departamentos registrados.
 DELETE FROM sucursal 
     WHERE id_sucursal NOT IN (
