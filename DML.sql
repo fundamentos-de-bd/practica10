@@ -175,37 +175,41 @@ INSERT INTO tener_departamento
 -- 16. Actualizar el numero de departamentos de la sucursal con menor numero de
 --     estos, para que ahora tenga la misma cantidad de departamentos que la sucursal
 --     con mayor numero de departamentos.
-UPDATE tener_departamento
-  SET id_tipo = (SELECT id_tipo FROM tener_departamento
-                 WHERE id_suc = (SELECT id_suc 
-                                 FROM (SELECT id_suc
-                                        FROM(SELECT id_suc, COUNT(id_suc) AS num_tipo 
-                                              FROM tener_departamento 
-                                              GROUP BY id_suc )
-                                        WHERE num_tipo = (SELECT MAX(num_tipo) AS maximos
-                                                          FROM(SELECT COUNT(id_suc) AS num_tipo 
-                                                                FROM tener_departamento 
-                                                                GROUP BY id_suc )))
-                                  WHERE ROWNUM = 1) )
-WHERE id_suc = (SELECT id_suc  
-                FROM (SELECT id_suc
-                       FROM(SELECT id_suc, COUNT(id_suc) as num_tipo 
-                            FROM tener_departamento 
-                       GROUP BY id_suc ) 
-                WHERE num_tipo = (SELECT MIN(num_tipo) AS minimos
-                                  FROM(SELECT COUNT(id_suc) AS num_tipo 
-                                       FROM tener_departamento 
-                                       GROUP BY id_suc ))));  
 
-select id_suc, id_tipo from tener_departamento where id_suc = (SELECT id_suc  
-                FROM (SELECT id_suc
-                       FROM(SELECT id_suc, COUNT(id_suc) as num_tipo 
-                            FROM tener_departamento 
-                       GROUP BY id_suc ) 
-                WHERE num_tipo = (SELECT MIN(num_tipo) AS minimos
-                                  FROM(SELECT COUNT(id_suc) AS num_tipo 
-                                       FROM tener_departamento 
-                                       GROUP BY id_suc ))));
+INSERT INTO tener_departamento(id_suc, id_tipo)
+ SELECT id_suc, id_tipo 
+ FROM ((SELECT id_suc
+        FROM(SELECT id_suc, COUNT(id_suc) as num_tipo 
+             FROM tener_departamento 
+             GROUP BY id_suc ) 
+        WHERE num_tipo = (SELECT MIN(num_tipo) AS minimos
+                          FROM(SELECT COUNT(id_suc) AS num_tipo 
+                               FROM tener_departamento 
+                               GROUP BY id_suc )))),
+      ((SELECT id_tipo 
+        FROM tener_departamento
+        WHERE id_suc = (SELECT id_suc 
+                        FROM (SELECT id_suc
+                               FROM(SELECT id_suc, COUNT(id_suc) AS num_tipo 
+                                    FROM tener_departamento 
+                                    GROUP BY id_suc )
+                               WHERE num_tipo = (SELECT MAX(num_tipo) AS maximos
+                                                  FROM(SELECT COUNT(id_suc) AS num_tipo 
+                                                        FROM tener_departamento 
+                                                        GROUP BY id_suc )))
+                        WHERE ROWNUM = 1))
+         MINUS                                                                   
+         (SELECT id_tipo 
+          FROM tener_departamento                                                                    
+          WHERE id_suc = (SELECT id_suc
+                          FROM(SELECT id_suc, COUNT(id_suc) as num_tipo 
+                               FROM tener_departamento 
+                               GROUP BY id_suc ) 
+                          WHERE num_tipo = (SELECT MIN(num_tipo) AS minimos
+                                           FROM(SELECT COUNT(id_suc) AS num_tipo 
+                                                FROM tener_departamento 
+                                                GROUP BY id_suc ))
+                          AND ROWNUM = 1)));
                                       
 -- ========================================================================== --
 -- ========================================================================== --
