@@ -72,6 +72,15 @@ SELECT id_cliente, MAX(CURRENT_DATE - fecha_reg)/365.25 antig
 -- ========================================================================== --
 
 -- ========================================================================== --
+-- 8. Conocer cuales son los productos que tienen en común cada uno de los departamentos de las diferentes sucursales.
+SELECT DISTINCT id_producto
+    FROM (SELECT COUNT(id_departamento) aa, id_producto
+            FROM instancia_producto
+            GROUP BY id_producto)
+    WHERE aa = 3;
+-- ========================================================================== --
+
+-- ========================================================================== --
 -- 12. Eliminar a las sucursales que tengan menos de 1 departamentos registrados.
 DELETE FROM sucursal 
     WHERE id_sucursal NOT IN (
